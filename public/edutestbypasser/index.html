@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EduTest Bypass</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background: #0f1117;
+      color: #e6edf3;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .box {
+      width: 100%;
+      max-width: 520px;
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 12px;
+      padding: 32px 28px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    }
+
+    .urgent-warning {
+      background: rgba(248, 81, 73, 0.1);
+      border: 2px solid #f85149;
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      animation: pulse 2s infinite ease-in-out;
+    }
+
+    @keyframes pulse {
+      0%, 100% { border-color: #f85149; box-shadow: 0 0 0 0 rgba(248, 81, 73, 0.4); }
+      50% { border-color: #ff7b72; box-shadow: 0 0 16px 2px rgba(248, 81, 73, 0.25); }
+    }
+
+    .arrow-icon {
+      font-size: 38px;
+      line-height: 1;
+      color: #f85149;
+      flex-shrink: 0;
+      animation: bounce 1s infinite alternate ease-in-out;
+    }
+
+    @keyframes bounce {
+      from { transform: translateX(0); }
+      to { transform: translateX(6px); }
+    }
+
+    .urgent-text {
+      font-size: 24px;
+      font-weight: 800;
+      color: #ffffff;
+      line-height: 1.25;
+      text-transform: uppercase;
+      letter-spacing: -0.01em;
+    }
+
+    .urgent-text span {
+      color: #ff7b72;
+      text-decoration: underline;
+      text-underline-offset: 4px;
+    }
+
+    h1 {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 18px;
+      color: #f0f6fc;
+    }
+
+    ol {
+      margin-bottom: 24px;
+      padding-left: 20px;
+      color: #8b949e;
+      font-size: 14px;
+      line-height: 1.8;
+    }
+
+    code {
+      background: #21262d;
+      border: 1px solid #363b42;
+      color: #58a6ff;
+      padding: 2px 6px;
+      border-radius: 6px;
+      font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, monospace;
+      font-size: 13px;
+    }
+
+    .copy-btn {
+      width: 100%;
+      padding: 14px;
+      font-size: 16px;
+      font-weight: 600;
+      color: #ffffff;
+      background: #238636;
+      border: 1px solid rgba(240, 246, 252, 0.1);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.15s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .copy-btn:hover {
+      background: #2ea043;
+    }
+
+    .copy-btn:active {
+      background: #1f7f32;
+    }
+
+    .copy-btn.ok {
+      background: #1f6feb;
+    }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <div class="urgent-warning">
+      <div class="arrow-icon">➔</div>
+      <div class="urgent-text">
+        ВСТАВЛЯТЬ СТРОГО <span>ДО</span> НАЖАТИЯ «НАЧАТЬ»!
+      </div>
+    </div>
+
+    <h1>Инструкция</h1>
+
+    <ol>
+      <li>Открой страницу экзамена</li>
+      <li>Нажми <code>F12</code> &rarr; вкладка <code>Console</code></li>
+      <li>Скопируй скрипт кнопкой ниже</li>
+      <li>Вставь в консоль и нажми <code>Enter</code></li>
+    </ol>
+
+    <button class="copy-btn" id="copyBtn" onclick="copyScript()">
+      Скопировать скрипт
+    </button>
+  </div>
+
+  <script>
+const SCRIPT = `(() => {
+  const BLOCKED = ['copy','cut','paste','contextmenu','visibilitychange','webkitvisibilitychange','fullscreenchange','webkitfullscreenchange','mozfullscreenchange','MSFullscreenChange','beforeunload','pagehide'];
+  const origAdd = EventTarget.prototype.addEventListener;
+  EventTarget.prototype.addEventListener = function(type, listener, options) {
+    if (type === 'keydown' || type === 'keyup') {
+      const wrapped = function(e) {
+        const k = (e.key || '').toUpperCase();
+        if (k === 'F12' || (e.ctrlKey && e.shiftKey && ['I','J','C'].includes(k)) || (e.ctrlKey && k === 'U') || (e.metaKey && e.altKey && ['I','J','C'].includes(k))) {
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          return;
+        }
+        return listener.call(this, e);
+      };
+      return origAdd.call(this, type, wrapped, options);
+    }
+    if (BLOCKED.includes(type)) return;
+    return origAdd.call(this, type, listener, options);
+  };
+  Object.defineProperty(document, 'hidden', { get: () => false, configurable: false });
+  Object.defineProperty(document, 'visibilityState', { get: () => 'visible', configurable: false });
+  document.hasFocus = () => true;
+  Object.defineProperty(document, 'fullscreenElement', { get: () => document.documentElement, configurable: false });
+  Object.defineProperty(document, 'webkitFullscreenElement', { get: () => document.documentElement, configurable: false });
+  Object.defineProperty(document, 'fullscreenEnabled', { get: () => false, configurable: false });
+  document.exitFullscreen = () => Promise.resolve();
+  document.webkitExitFullscreen = () => Promise.resolve();
+  document.mozCancelFullScreen = () => Promise.resolve();
+  document.msExitFullscreen = () => Promise.resolve();
+  const origBeacon = navigator.sendBeacon;
+  navigator.sendBeacon = function(url, data) {
+    if (String(url).includes('/violation')) return true;
+    return origBeacon.call(this, url, data);
+  };
+  const origFetch = window.fetch;
+  window.fetch = function(url, ...args) {
+    if (String(url).includes('/violation')) {
+      return Promise.resolve(new Response(JSON.stringify({ status: 200, data: { total_violations: 0, action: 'NONE' } }), { status: 200, headers: { 'Content-Type': 'application/json' } }));
+    }
+    return origFetch.apply(this, [url, ...args]);
+  };
+  const origOpen = XMLHttpRequest.prototype.open;
+  const origSend = XMLHttpRequest.prototype.send;
+  XMLHttpRequest.prototype.open = function(method, url, ...rest) {
+    this.__url = String(url);
+    this.__method = method;
+    return origOpen.call(this, method, url, ...rest);
+  };
+  XMLHttpRequest.prototype.send = function(body) {
+    if (this.__url && this.__url.includes('/violation')) {
+      const self = this;
+      setTimeout(() => {
+        Object.defineProperty(self, 'readyState', { value: 4, configurable: true });
+        Object.defineProperty(self, 'status', { value: 200, configurable: true });
+        Object.defineProperty(self, 'statusText', { value: 'OK', configurable: true });
+        const fakeBody = JSON.stringify({ status: 200, data: { total_violations: 0, action: 'NONE' } });
+        Object.defineProperty(self, 'responseText', { value: fakeBody, configurable: true });
+        Object.defineProperty(self, 'response', { value: fakeBody, configurable: true });
+        self.getAllResponseHeaders = () => 'content-type: application/json\\r\\n';
+        if (self.onreadystatechange) self.onreadystatechange();
+        if (self.onload) self.onload();
+        if (self.onloadend) self.onloadend();
+      }, 10);
+      return;
+    }
+    return origSend.call(this, body);
+  };
+  const origAppendChild = Node.prototype.appendChild;
+  Node.prototype.appendChild = function(child) {
+    if (child && child.tagName === 'SCRIPT' && child.src) {
+      const src = String(child.src);
+      if (src.includes('narxoz-test.oes.kz') || src.includes('sdu.proctoring.app') || src.includes('/proctoring/') || src.includes('supervisor.js')) return child;
+    }
+    return origAppendChild.call(this, child);
+  };
+  ['OESProctoring','SDUProctoring','OES','SDU'].forEach(name => {
+    if (window[name]) window[name] = new Proxy({}, { get: () => () => {} });
+  });
+  console.log('%c\\u2705 Античит EduTest отключён', 'color:green;font-weight:bold;font-size:16px');
+})();`;
+
+    function copyScript() {
+      const btn = document.getElementById('copyBtn');
+      navigator.clipboard.writeText(SCRIPT).then(() => {
+        btn.textContent = 'Скопировано!';
+        btn.classList.add('ok');
+        setTimeout(() => {
+          btn.textContent = 'Скопировать скрипт';
+          btn.classList.remove('ok');
+        }, 2000);
+      });
+    }
+  </script>
+</body>
+</html>
